@@ -1379,6 +1379,11 @@ codegen_texture_fetch(uint8_t *code_block, voodoo_t *voodoo, voodoo_params_t *pa
         addlong(ARM64_CMP_REG(4, 10));
         addlong(ARM64_CSEL(4, 10, 4, COND_GE));  /* if lod >= max, lod = max */
 
+        /* lod_frac[tmu] = lod & 0xff: the LOD_FRAC trilinear blend weight,
+         * taken from the clamped 8.8 LOD before it is reduced to the level index. */
+        addlong(ARM64_UXTB(10, 4));
+        addlong(ARM64_STR_W(10, 0, STATE_lod_frac_n(tmu)));
+
         /* LSR w4, w4, #8 -- integer LOD */
         addlong(ARM64_LSR_IMM(4, 4, 8));
 
