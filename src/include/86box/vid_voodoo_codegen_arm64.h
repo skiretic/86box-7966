@@ -1254,7 +1254,7 @@ static uint32_t          i_00_ff_w[2] = { 0, 0xff };
  *
  * Register usage within this function:
  *   x0 = state, x1 = params (pinned)
- *   x4-x7, x10-x15 = scratch GPR
+ *   x4-x7, x10-x16 = scratch GPR (x16 = stored mip level in the texture fetch)
  *   x19 = logtable pointer (pinned)
  *   x25 = bilinear_lookup pointer (pinned)
  *   v0-v7, v16-v17 = scratch NEON
@@ -1470,7 +1470,7 @@ codegen_texture_fetch(uint8_t *code_block, voodoo_t *voodoo, voodoo_params_t *pa
             addlong(ARM64_LSL_REG(10, 10, 16));
             /* LDP w4, w5, [x0, #STATE_tex_s] -- load tex_s and tex_t */
             addlong(ARM64_LDP_OFF_W(4, 5, 0, STATE_tex_s));
-            /* LSL w10, w10, #3  ((1 << lod) << 3 = 1 << (lod+3)) */
+            /* LSL w10, w10, #3  ((1 << tex_lod) << 3 = 1 << (tex_lod+3)) */
             addlong(ARM64_LSL_IMM(10, 10, 3));
 
             /* Mirror S */
@@ -1806,9 +1806,9 @@ codegen_texture_fetch(uint8_t *code_block, voodoo_t *voodoo, voodoo_params_t *pa
                 PATCH_FORWARD_TBxZ(mirror_t_skip);
             }
 
-            /* LSR w4, w4, w6  (S >> (lod + 4)) */
+            /* LSR w4, w4, w6  (S >> (tex_lod + 4)) */
             addlong(ARM64_LSR_REG(4, 4, 6));
-            /* LSR w5, w5, w6  (T >> (lod + 4)) */
+            /* LSR w5, w5, w6  (T >> (tex_lod + 4)) */
             addlong(ARM64_LSR_REG(5, 5, 6));
 
             /* Clamp or wrap S */
