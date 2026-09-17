@@ -270,10 +270,10 @@ voodoo_use_texture(voodoo_t *voodoo, voodoo_params_t *params, int tmu)
     else
         addr = params->texBaseAddr[tmu];
 
-    /*The cache key must cover everything the per-level layout depends on: the tLOD
-      size, aspect, mirror and split/odd bits, and the trilinear bit of textureMode,
-      which changes the even/odd level mapping in voodoo_recalc_tex3. The same texture
-      drawn first without and then with trilinear must not reuse the old layout.*/
+    /*The cache key carries the tLOD bits that shape the per-level layout (lod range,
+      split/odd, aspect) plus the trilinear bit of textureMode, which switches
+      voodoo_recalc_tex3 to the even/odd level mapping. The same texture drawn first
+      without and then with trilinear must not reuse the old decoded layout.*/
     tex_key = (params->tLOD[tmu] & 0xfc0fff) | (params->textureMode[tmu] & TEXTUREMODE_TRILINEAR);
 
     /*Try to find texture in cache*/
